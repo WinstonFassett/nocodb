@@ -54,7 +54,9 @@ export async function dataList(param: {
   try {
     listArgs.sortArr = JSON.parse(listArgs.sortArrJson);
   } catch (e) {}
-
+  try {
+    listArgs.groupArr = JSON.parse(listArgs.groupArrJson);
+  } catch (e) {}
   let data = [];
   let count = 0;
 
@@ -136,6 +138,9 @@ async function getGroupedDataList(param: {
   } catch (e) {}
   try {
     listArgs.sortArr = JSON.parse(listArgs.sortArrJson);
+  } catch (e) {}
+  try {
+    listArgs.groupArr = JSON.parse(listArgs.groupArrJson);
   } catch (e) {}
   try {
     listArgs.options = JSON.parse(listArgs.optionsArrJson);

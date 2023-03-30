@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import BasePage from '../../../Base';
 import { ToolbarFieldsPage } from './Fields';
 import { ToolbarSortPage } from './Sort';
+import { ToolbarGroupPage } from './Group';
 import { ToolbarFilterPage } from './Filter';
 import { ToolbarShareViewPage } from './ShareView';
 import { ToolbarViewMenuPage } from './ViewMenu';
@@ -22,6 +23,7 @@ export class ToolbarPage extends BasePage {
   readonly parent: GridPage | GalleryPage | FormPage | KanbanPage | MapPage;
   readonly fields: ToolbarFieldsPage;
   readonly sort: ToolbarSortPage;
+  readonly group: ToolbarGroupPage;
   readonly filter: ToolbarFilterPage;
   readonly shareView: ToolbarShareViewPage;
   readonly viewsMenu: ToolbarViewMenuPage;
@@ -36,6 +38,7 @@ export class ToolbarPage extends BasePage {
     this.parent = parent;
     this.fields = new ToolbarFieldsPage(this);
     this.sort = new ToolbarSortPage(this);
+    this.group = new ToolbarGroupPage(this);
     this.filter = new ToolbarFilterPage(this);
     this.shareView = new ToolbarShareViewPage(this);
     this.viewsMenu = new ToolbarViewMenuPage(this);

@@ -19,7 +19,7 @@ import type { TabItem } from '~/lib'
 export function useViewSorts(view: Ref<ViewType | undefined>, reloadData?: () => void) {
   const { sharedView } = useSharedView()
 
-  const { sorts } = useSmartsheetStoreOrThrow()
+  const { sorts, groups } = useSmartsheetStoreOrThrow()
 
   const { $api, $e } = useNuxtApp()
 
@@ -57,6 +57,29 @@ export function useViewSorts(view: Ref<ViewType | undefined>, reloadData?: () =>
     }
   }
 
+  const loadGroups = async () => {
+    if (isPublic.value) {
+      // todo: groups missing on `ViewType`
+      const sharedGroups = (sharedView.value as any)?.groups || []
+      groups.value = [...sharedGroups]
+      return
+    }
+  
+    try {
+      if (!isUIAllowed('groupsSync')) {
+        const groupsBackup = tabMeta.value.groupsState!.get(view.value!.id!)
+        if (groupsBackup) {
+          groups.value = groupsBackup
+          return
+        }
+      }
+      if (!view?.value) return
+      groups.value = (await $api.dbTableGroup.list(view.value!.id!)).list as GroupType[]
+    } catch (e: any) {
+      console.error(e)
+      message.error(await extractSdkResponseErrorMsg(e))
+    }
+  }
   const saveOrUpdate = async (sort: SortType, i: number) => {
     if (isPublic.value || isSharedBase.value) {
       sorts.value[i] = sort

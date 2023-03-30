@@ -21,6 +21,7 @@ export async function viewMetaGet(param: {
 
   await view.getFilters();
   await view.getSorts();
+  await view.getGroups();
 
   await view.getViewWithInfo();
   await view.getColumns();

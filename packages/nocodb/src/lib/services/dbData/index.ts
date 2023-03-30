@@ -123,7 +123,9 @@ export async function getDataList(param: {
   try {
     listArgs.sortArr = JSON.parse(listArgs.sortArrJson);
   } catch (e) {}
-
+  try {
+    listArgs.groupArr = JSON.parse(listArgs.groupArrJson);
+  } catch (e) {}
   let data = [];
   let count = 0;
   try {
@@ -169,7 +171,9 @@ export async function getFindOne(param: {
   try {
     args.sortArr = JSON.parse(args.sortArrJson);
   } catch (e) {}
-
+  try {
+    args.groupArr = JSON.parse(args.groupArrJson);
+  } catch (e) {}
   const data = await baseModel.findOne(args);
   return data
     ? await nocoExecute(
@@ -287,6 +291,9 @@ export async function getGroupedDataList(param: {
   } catch (e) {}
   try {
     listArgs.sortArr = JSON.parse(listArgs.sortArrJson);
+  } catch (e) {}
+  try {
+    listArgs.groupArr = JSON.parse(listArgs.groupArrJson);
   } catch (e) {}
   try {
     listArgs.options = JSON.parse(listArgs.optionsArrJson);

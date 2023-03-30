@@ -38,7 +38,9 @@ export async function getDbRows(param: {
   try {
     listArgs.sortArr = JSON.parse(listArgs.sortArrJson);
   } catch (e) {}
-
+  try {
+    listArgs.groupArr = JSON.parse(listArgs.groupArrJson);
+  } catch (e) {}
   const base = await Base.get(param.model.base_id);
   const baseModel = await Model.getBaseModelSQL({
     id: param.model.id,

@@ -78,6 +78,7 @@ export interface TabItem {
   viewTitle?: string
   viewId?: string
   sortsState?: Map<string, any>
+  groupsState?: Map<string, any>
   filterState?: Map<string, any>
   meta?: MetaType
 }

@@ -21,6 +21,7 @@ import Filter, {
   IS_WITHIN_COMPARISON_SUB_OPS,
 } from '../../../../models/Filter';
 import Sort from '../../../../models/Sort';
+import Group from '../../../../models/Group';
 import View from '../../../../models/View';
 import formSubmissionEmailTemplate from '../../../../utils/common/formSubmissionEmailTemplate';
 import Audit from '../../../../models/Audit';
@@ -178,6 +179,7 @@ class BaseModelSqlv2 {
       offset?;
       filterArr?: Filter[];
       sortArr?: Sort[];
+      groupArr?: Group[];
       sort?: string | string[];
     } = {},
     ignoreViewFilterAndSort = false
@@ -221,7 +223,18 @@ class BaseModelSqlv2 {
         sorts = args.sortArr?.length
           ? args.sortArr
           : await Sort.list({ viewId: this.viewId });
-
+      const groups = args.groupArr?.length
+          ? args.groupArr
+          : await Group.list({ viewId: this.viewId });          
+      if (groups.length) {
+        const groupSorts = groups.map(group => {
+          return new Sort({
+            id: `g-${group.id}`,
+            ...group
+          }) 
+        })
+        sorts = groupSorts.concat(sorts)
+      }
       await sortV2(sorts, qb, this.dbDriver);
     } else {
       await conditionV2(

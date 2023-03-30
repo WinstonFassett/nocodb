@@ -10,6 +10,7 @@ import baseController from '../../controllers/base.ctl';
 import tableController from '../../controllers/table.ctl';
 import columnController from '../../controllers/column.ctl';
 import sortController from '../../controllers/sort.ctl';
+import groupController from '../../controllers/group.ctl';
 import filterController from '../../controllers/filter.ctl';
 import viewColumnController from '../../controllers/viewColumn.ctl';
 import gridViewController from '../../controllers/views/gridView.ctl';
@@ -74,6 +75,7 @@ export default function (router: Router, server) {
   router.use(dataAliasExportController);
   router.use(oldDataController);
   router.use(sortController);
+  router.use(groupController);
   router.use(filterController);
   router.use(viewColumnController);
   router.use(gridViewController);

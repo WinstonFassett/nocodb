@@ -5654,6 +5654,257 @@
         ]
       }
     },
+    "/api/v1/db/meta/views/{viewId}/groups": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string",
+            "example": "vw_wtdg2meyig5l4q"
+          },
+          "name": "viewId",
+          "in": "path",
+          "required": true,
+          "description": "Unique View ID"
+        }
+      ],
+      "get": {
+        "summary": "List View Groups",
+        "operationId": "db-table-group-list",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupList"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "list": [
+                        {
+                          "id": "so_xd4t51uv60ghzl",
+                          "fk_column_id": "cl_l11b769pe2j1ce",
+                          "fk_model_id": "md_ehn5izr99m7d45",
+                          "base_id": "ds_3l9qx8xqksenrl",
+                          "direction": "desc",
+                          "order": 1,
+                          "project_id": "p_9sx43moxhqtjm3"
+                        }
+                      ],
+                      "pageInfo": {
+                        "isFirstPage": true,
+                        "isLastPage": true,
+                        "page": 1,
+                        "pageSize": 10,
+                        "totalRows": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "tags": ["DB Table Group"],
+        "description": "List all the group data in a given View",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/xc-auth"
+          }
+        ]
+      },
+      "post": {
+        "summary": "Update View Group",
+        "operationId": "db-table-group-create",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "tags": ["DB Table Group"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GroupReq"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "push_to_top": {
+                        "type": "boolean",
+                        "example": true,
+                        "description": "Push the group to the top of the list"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "description": "Update the group data in a given View",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/xc-auth"
+          }
+        ]
+      }
+    },
+    "/api/v1/db/meta/groups/{groupId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string",
+            "example": "so_xd4t51uv60ghzl"
+          },
+          "name": "groupId",
+          "in": "path",
+          "description": "Unique Group ID",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Get Group",
+        "operationId": "db-table-group-get",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "id": "so_xd4t51uv60ghzl",
+                      "fk_column_id": "cl_l11b769pe2j1ce",
+                      "fk_model_id": "md_ehn5izr99m7d45",
+                      "base_id": "ds_3l9qx8xqksenrl",
+                      "direction": "desc",
+                      "order": 1,
+                      "project_id": "p_9sx43moxhqtjm3"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "tags": ["DB Table Group"],
+        "description": "Get the group data by Group ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/xc-auth"
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Update Group",
+        "operationId": "db-table-group-update",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "example": 1
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "tags": ["DB Table Group"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupReq"
+              },
+              "examples": {
+                "Example 1": {
+                  "value": {
+                    "direction": "asc",
+                    "fk_column_id": "cl_l11b769pe2j1ce"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Update the group data by Group ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/xc-auth"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete Group",
+        "operationId": "db-table-group-delete",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "tags": ["DB Table Group"],
+        "description": "Delete the group data by Group ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/xc-auth"
+          }
+        ]
+      }
+    },    
     "/api/v1/db/meta/views/{viewId}/filters": {
       "parameters": [
         {
@@ -18535,6 +18786,166 @@
           "id": "shzdd8k3xswo9"
         }
       },
+      "Group": {
+        "description": "Model for Group",
+        "examples": [
+          {
+            "id": "so_xd4t51uv60ghzl",
+            "fk_column_id": "cl_l11b769pe2j1ce",
+            "fk_model_id": "md_ehn5izr99m7d45",
+            "base_id": "ds_3l9qx8xqksenrl",
+            "direction": "desc",
+            "order": 1,
+            "project_id": "p_9sx43moxhqtjm3"
+          }
+        ],
+        "title": "Group Model",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Id",
+            "description": "Unique ID"
+          },
+          "fk_column_id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "fk_model_id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "base_id": {
+            "type": "string",
+            "description": "Base ID",
+            "example": "ds_3l9qx8xqksenrl",
+            "readOnly": true
+          },
+          "direction": {
+            "type": "string",
+            "description": "Sort direction",
+            "enum": ["asc", "desc"],
+            "example": "desc"
+          },
+          "order": {
+            "type": "number",
+            "example": 1
+          },
+          "project_id": {
+            "type": "string",
+            "description": "Project ID",
+            "example": "p_9sx43moxhqtjm3",
+            "readOnly": true
+          }
+        },
+        "x-stoplight": {
+          "id": "tlcmtmjzcyhm6"
+        }
+      },
+      "GroupList": {
+        "description": "Model for Group List",
+        "examples": [
+          {
+            "list": [
+              {
+                "id": "so_xd4t51uv60ghzl",
+                "fk_column_id": "cl_l11b769pe2j1ce",
+                "fk_model_id": "md_ehn5izr99m7d45",
+                "base_id": "ds_3l9qx8xqksenrl",
+                "direction": "desc",
+                "order": 1,
+                "project_id": "p_9sx43moxhqtjm3"
+              }
+            ],
+            "pageInfo": {
+              "isFirstPage": true,
+              "isLastPage": true,
+              "page": 1,
+              "pageSize": 10,
+              "totalRows": 1
+            }
+          }
+        ],
+        "title": "Group List Model",
+        "type": "object",
+        "x-examples": {
+          "example-1": {
+            "bases": {
+              "list": [
+                {
+                  "alias": "string",
+                  "database": "string",
+                  "host": "string",
+                  "id": "string",
+                  "params": "string",
+                  "password": "string",
+                  "port": 0,
+                  "project_id": "string",
+                  "ssl": "string",
+                  "type": "string",
+                  "url": "string",
+                  "username": "string"
+                }
+              ],
+              "pageInfo": {
+                "isFirstPage": true,
+                "isLastPage": true,
+                "pageSize": 0,
+                "sort": "string",
+                "totalRows": 0
+              }
+            }
+          }
+        },
+        "properties": {
+          "list": {
+            "type": "array",
+            "x-stoplight": {
+              "id": "gjqqc8ciqg947"
+            },
+            "description": "List of Group Objects",
+            "items": {
+              "$ref": "#/components/schemas/Group",
+              "x-stoplight": {
+                "id": "usnfa1kbovpmb"
+              }
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/Paginated",
+            "x-stoplight": {
+              "id": "i75wcejfp5mnq"
+            }
+          }
+        },
+        "required": ["list", "pageInfo"],
+        "x-stoplight": {
+          "id": "7j3nbohh43tyy"
+        }
+      },
+      "GroupReq": {
+        "description": "Model for Group Request",
+        "examples": [
+          {
+            "direction": "asc",
+            "fk_column_id": "cl_l11b769pe2j1ce"
+          }
+        ],
+        "minProperties": 1,
+        "title": "Group Request Model",
+        "type": "object",
+        "properties": {
+          "fk_column_id": {
+            "$ref": "#/components/schemas/Id",
+            "description": "Foreign Key to Column"
+          },
+          "direction": {
+            "description": "Sort direction",
+            "enum": ["asc", "desc"],
+            "type": "string"
+          }
+        },
+        "x-stoplight": {
+          "id": "shzdd8k3xswo9"
+        }
+      },      
       "StringOrNull": {
         "description": "Model for StringOrNull",
         "examples": ["string"],

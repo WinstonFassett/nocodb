@@ -312,6 +312,18 @@ async function configureGrid() {
         });
       }
 
+      // group
+      for (let sCnt = 0; sCnt < gridList[gridCnt].group.length; sCnt++) {
+        let sColName = tblSchema.columns.find(
+          a => gridList[gridCnt].group[sCnt].fk_column_id === a.id
+        ).title;
+        await api.dbTableGroup.create(viewId, {
+          fk_column_id: srcTbl.columns.find(a => a.title === sColName)?.id,
+          direction: gridList[gridCnt].group[sCnt].direction
+        });
+      }
+      
+
       // filter
       for (let fCnt = 0; fCnt < gridList[gridCnt].filter.length; fCnt++) {
         let fColName = tblSchema.columns.find(

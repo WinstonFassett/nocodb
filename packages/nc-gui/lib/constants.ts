@@ -55,6 +55,7 @@ export const rolePermissions = {
       gridViewOptions: true,
       sortSync: true,
       fieldsSync: true,
+      groupsSync: true,
       gridColUpdate: true,
       filterSync: true,
       filterChildrenRead: true,

@@ -9,7 +9,6 @@ import NocoCache from '../cache/NocoCache';
 import { extractProps } from '../meta/helpers/extractProps';
 import Model from './Model';
 import Column from './Column';
-import type { GroupType } from 'nocodb-sdk';
 
 export default class Group {
   id: string;
@@ -20,7 +19,7 @@ export default class Group {
   project_id?: string;
   base_id?: string;
 
-  constructor(data: Partial<GroupType>) {
+  constructor(data: any) {
     Object.assign(this, data);
   }
 

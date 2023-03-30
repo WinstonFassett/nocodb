@@ -6,6 +6,7 @@ import type {
   PaginatedType,
   RequestParams,
   SortType,
+  GroupType,
   TableType,
   ViewType,
 } from 'nocodb-sdk'
@@ -29,6 +30,8 @@ export function useSharedView() {
   const sharedView = useState<ViewType | undefined>('sharedView', () => undefined)
 
   const sorts = ref<SortType[]>([])
+
+  const groups = ref<GroupType[]>([])
 
   const password = useState<string | undefined>('password', () => undefined)
 
@@ -98,6 +101,7 @@ export function useSharedView() {
 
   const fetchSharedViewData = async (param: {
     sortsArr: SortType[]
+    groupsArr: GroupType[]
     filtersArr: FilterType[]
     fields?: any[]
     sort?: any[]
@@ -125,6 +129,7 @@ export function useSharedView() {
         ...param,
         filterArrJson: JSON.stringify(param.filtersArr ?? nestedFilters.value),
         sortArrJson: JSON.stringify(param.sortsArr ?? sorts.value),
+        groupArrJson: JSON.stringify(param.groupsArr ?? groups.value),
       } as any,
       {
         headers: {
@@ -136,7 +141,7 @@ export function useSharedView() {
 
   const fetchSharedViewGroupedData = async (
     columnId: string,
-    { sortsArr, filtersArr }: { sortsArr: SortType[]; filtersArr: FilterType[] },
+    { sortsArr, groupsArr, filtersArr }: { sortsArr: SortType[]; filtersArr: FilterType[] },
   ) => {
     if (!sharedView.value) return
 
@@ -150,6 +155,7 @@ export function useSharedView() {
         offset: (page - 1) * pageSize,
         filterArrJson: JSON.stringify(filtersArr ?? nestedFilters.value),
         sortArrJson: JSON.stringify(sortsArr ?? sorts.value),
+        groupArrJson: JSON.stringify(groupsArr ?? groups.value),
       } as any,
       {
         headers: {
@@ -164,7 +170,7 @@ export function useSharedView() {
     offset: number,
     type: ExportTypes.EXCEL | ExportTypes.CSV,
     responseType: 'base64' | 'blob',
-    { sortsArr, filtersArr }: { sortsArr: SortType[]; filtersArr: FilterType[] } = { sortsArr: [], filtersArr: [] },
+    { sortsArr, groupsArr, filtersArr }: { sortsArr: SortType[]; groupsArr: GroupType[]; filtersArr: FilterType[] } = { sortsArr: [], groupsArr: [], filtersArr: [] },
   ) => {
     return await $api.public.csvExport(sharedView.value!.uuid!, type, {
       format: responseType,
@@ -173,6 +179,7 @@ export function useSharedView() {
         offset,
         filterArrJson: JSON.stringify(filtersArr ?? nestedFilters.value),
         sortArrJson: JSON.stringify(sortsArr ?? sorts.value),
+        groupArrJson: JSON.stringify(groupsArr ?? groups.value),
       },
       headers: {
         'xc-password': password.value,

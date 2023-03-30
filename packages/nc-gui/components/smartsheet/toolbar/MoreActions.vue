@@ -38,7 +38,7 @@ const fields = inject(FieldsInj, ref([]))
 
 const selectedView = inject(ActiveViewInj, ref())
 
-const { sorts, nestedFilters } = useSmartsheetStoreOrThrow()
+const { sorts, groups, nestedFilters } = useSmartsheetStoreOrThrow()
 
 const { exportFile: sharedViewExportFile } = useSharedView()
 
@@ -76,6 +76,7 @@ const exportFile = async (exportType: ExportTypes) => {
               fields: fields.value.map((field) => field.title),
               offset,
               sortArrJson: JSON.stringify(sorts.value),
+              groupArrJson: JSON.stringify(groups.value),
               filterArrJson: JSON.stringify(nestedFilters.value),
             },
           } as RequestParams,

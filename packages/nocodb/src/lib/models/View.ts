@@ -16,6 +16,7 @@ import KanbanView from './KanbanView';
 import GalleryView from './GalleryView';
 import GridViewColumn from './GridViewColumn';
 import Sort from './Sort';
+import Group from './Group';
 import Filter from './Filter';
 import GalleryViewColumn from './GalleryViewColumn';
 import FormViewColumn from './FormViewColumn';
@@ -49,6 +50,7 @@ export default class View implements ViewType {
   >;
 
   sorts: Sort[];
+  groups: Group[];
   filter: Filter;
   project_id?: string;
   base_id?: string;
@@ -241,6 +243,10 @@ export default class View implements ViewType {
     return (this.sorts = await Sort.list({ viewId: this.id }, ncMeta));
   }
 
+  public async getGroups(ncMeta = Noco.ncMeta) {
+    return (this.groups = await Group.list({ viewId: this.id }, ncMeta));
+  }
+
   static async insert(
     view: Partial<View> &
       Partial<FormView | GridView | GalleryView | KanbanView | MapView> & {
@@ -360,6 +366,7 @@ export default class View implements ViewType {
 
     if (copyFromView) {
       const sorts = await copyFromView.getSorts(ncMeta);
+      const groups = await copyFromView.getGroups(ncMeta);
       const filters = await copyFromView.getFilters(ncMeta);
       columns = await copyFromView.getColumns(ncMeta);
 
@@ -367,6 +374,17 @@ export default class View implements ViewType {
         await Sort.insert(
           {
             ...sort,
+            fk_view_id: view_id,
+            id: null,
+          },
+          ncMeta
+        );
+      }
+
+      for (const group of groups) {
+        await Group.insert(
+          {
+            ...group,
             fk_view_id: view_id,
             id: null,
           },
@@ -986,6 +1004,7 @@ export default class View implements ViewType {
   static async delete(viewId, ncMeta = Noco.ncMeta) {
     const view = await this.get(viewId);
     await Sort.deleteAll(viewId);
+    await Group.deleteAll(viewId);
     await Filter.deleteAll(viewId);
     const table = this.extractViewTableName(view);
     const tableScope = this.extractViewTableNameScope(view);

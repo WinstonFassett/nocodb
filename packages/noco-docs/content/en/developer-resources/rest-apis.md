@@ -102,6 +102,11 @@ Currently, the default value for {orgs} is <b>noco</b>. Users will be able to ch
 | Meta | Patch | dbTableFilter | update | /api/v1/db/meta/filters/{filterId} |
 | Meta | Delete| dbTableFilter | delete | /api/v1/db/meta/filters/{filterId} |
 | Meta | Get | dbTableFilter | childrenRead | /api/v1/db/meta/filters/{filterGroupId}/children |
+| Meta | Get | dbTableGroup | list | /api/v1/db/meta/views/{viewId}/groups |
+| Meta | Post | dbTableGroup | create | /api/v1/db/meta/views/{viewId}/groups |
+| Meta | Get | dbTableGroup | read | /api/v1/db/meta/groups/{groupId} |
+| Meta | Patch | dbTableGroup | update | /api/v1/db/meta/groups/{groupId} |
+| Meta | Delete| dbTableGroup | delete | /api/v1/db/meta/groups/{groupId}/api/v1/db |
 | Meta | Get | dbTableSort | list | /api/v1/db/meta/views/{viewId}/sorts |
 | Meta | Post | dbTableSort | create | /api/v1/db/meta/views/{viewId}/sorts |
 | Meta | Get | dbTableSort | read | /api/v1/db/meta/sorts/{sortId} |

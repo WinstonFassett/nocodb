@@ -2039,6 +2039,55 @@ export interface SortReqType {
 }
 
 /**
+ * Model for Group
+ */
+export interface GroupType {
+  /** Unique ID */
+  id?: IdType;
+  /** Model for ID */
+  fk_column_id?: IdType;
+  /** Model for ID */
+  fk_model_id?: IdType;
+  /**
+   * Base ID
+   * @example ds_3l9qx8xqksenrl
+   */
+  base_id?: string;
+  /**
+   * Sort direction
+   * @example desc
+   */
+  direction?: 'asc' | 'desc';
+  /** @example 1 */
+  order?: number;
+  /**
+   * Project ID
+   * @example p_9sx43moxhqtjm3
+   */
+  project_id?: string;
+}
+
+/**
+ * Model for Group List
+ */
+export interface GroupListType {
+  /** List of Group Objects */
+  list: GroupType[];
+  /** Model for Paginated */
+  pageInfo: PaginatedType;
+}
+
+/**
+ * Model for Group Request
+ */
+export interface GroupReqType {
+  /** Foreign Key to Column */
+  fk_column_id?: IdType;
+  /** Sort direction */
+  direction?: 'asc' | 'desc';
+}
+
+/**
  * Model for StringOrNull
  */
 export type StringOrNullType = string | null;
@@ -6156,6 +6205,161 @@ export class Api<
         }
       >({
         path: `/api/v1/db/meta/sorts/${sortId}`,
+        method: 'DELETE',
+        format: 'json',
+        ...params,
+      }),
+  };
+  dbTableGroup = {
+    /**
+ * @description List all the group data in a given View
+ * 
+ * @tags DB Table Group
+ * @name List
+ * @summary List View Groups
+ * @request GET:/api/v1/db/meta/views/{viewId}/groups
+ * @response `200` `GroupListType` OK
+ * @response `400` `{
+  \** @example BadRequest [Error]: <ERROR MESSAGE> *\
+  msg: string,
+
+}`
+ */
+    list: (viewId: string, params: RequestParams = {}) =>
+      this.request<
+        GroupListType,
+        {
+          /** @example BadRequest [Error]: <ERROR MESSAGE> */
+          msg: string;
+        }
+      >({
+        path: `/api/v1/db/meta/views/${viewId}/groups`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+ * @description Update the group data in a given View
+ * 
+ * @tags DB Table Group
+ * @name Create
+ * @summary Update View Group
+ * @request POST:/api/v1/db/meta/views/{viewId}/groups
+ * @response `200` `number` OK
+ * @response `400` `{
+  \** @example BadRequest [Error]: <ERROR MESSAGE> *\
+  msg: string,
+
+}`
+ */
+    create: (
+      viewId: string,
+      data: GroupReqType & {
+        /**
+         * Push the group to the top of the list
+         * @example true
+         */
+        push_to_top?: boolean;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<
+        number,
+        {
+          /** @example BadRequest [Error]: <ERROR MESSAGE> */
+          msg: string;
+        }
+      >({
+        path: `/api/v1/db/meta/views/${viewId}/groups`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+ * @description Get the group data by Group ID
+ * 
+ * @tags DB Table Group
+ * @name Get
+ * @summary Get Group
+ * @request GET:/api/v1/db/meta/groups/{groupId}
+ * @response `200` `GroupType` OK
+ * @response `400` `{
+  \** @example BadRequest [Error]: <ERROR MESSAGE> *\
+  msg: string,
+
+}`
+ */
+    get: (groupId: string, params: RequestParams = {}) =>
+      this.request<
+        GroupType,
+        {
+          /** @example BadRequest [Error]: <ERROR MESSAGE> */
+          msg: string;
+        }
+      >({
+        path: `/api/v1/db/meta/groups/${groupId}`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+ * @description Update the group data by Group ID
+ * 
+ * @tags DB Table Group
+ * @name Update
+ * @summary Update Group
+ * @request PATCH:/api/v1/db/meta/groups/{groupId}
+ * @response `200` `number` OK
+ * @response `400` `{
+  \** @example BadRequest [Error]: <ERROR MESSAGE> *\
+  msg: string,
+
+}`
+ */
+    update: (groupId: string, data: GroupReqType, params: RequestParams = {}) =>
+      this.request<
+        number,
+        {
+          /** @example BadRequest [Error]: <ERROR MESSAGE> */
+          msg: string;
+        }
+      >({
+        path: `/api/v1/db/meta/groups/${groupId}`,
+        method: 'PATCH',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+ * @description Delete the group data by Group ID
+ * 
+ * @tags DB Table Group
+ * @name Delete
+ * @summary Delete Group
+ * @request DELETE:/api/v1/db/meta/groups/{groupId}
+ * @response `200` `boolean` OK
+ * @response `400` `{
+  \** @example BadRequest [Error]: <ERROR MESSAGE> *\
+  msg: string,
+
+}`
+ */
+    delete: (groupId: string, params: RequestParams = {}) =>
+      this.request<
+        boolean,
+        {
+          /** @example BadRequest [Error]: <ERROR MESSAGE> */
+          msg: string;
+        }
+      >({
+        path: `/api/v1/db/meta/groups/${groupId}`,
         method: 'DELETE',
         format: 'json',
         ...params,

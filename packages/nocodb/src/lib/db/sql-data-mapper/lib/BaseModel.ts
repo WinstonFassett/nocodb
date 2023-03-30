@@ -3,6 +3,7 @@ import groupBy from 'lodash/groupBy';
 import type { Knex } from 'knex';
 import type Filter from '../../../models/Filter';
 import type Sort from '../../../models/Sort';
+import Group from '../../../models/Group';
 
 const autoBind = require('auto-bind');
 const Validator = require('validator');
@@ -1516,6 +1517,7 @@ export interface XcFilter {
   fields?: string;
   filterArr?: Filter[];
   sortArr?: Sort[];
+  groupArr?: Group[];
 }
 
 export interface XcFilterWithAlias extends XcFilter {

@@ -1,5 +1,5 @@
 import { ViewTypes } from 'nocodb-sdk'
-import type { FilterType, KanbanType, SortType, TableType, ViewType } from 'nocodb-sdk'
+import type { FilterType, KanbanType, SortType, GroupType, TableType, ViewType } from 'nocodb-sdk'
 import type { Ref } from 'vue'
 import {
   computed,
@@ -20,6 +20,7 @@ const [useProvideSmartsheetStore, useSmartsheetStore] = useInjectionState(
     meta: Ref<TableType | KanbanType | undefined>,
     shared = false,
     initialSorts?: Ref<SortType[]>,
+    // initialGroups?: Ref<GroupType[]>,
     initialFilters?: Ref<FilterType[]>,
   ) => {
     const { $api } = useNuxtApp()
@@ -64,6 +65,7 @@ const [useProvideSmartsheetStore, useSmartsheetStore] = useInjectionState(
 
     const isSqlView = computed(() => (meta.value as TableType)?.type === 'view')
     const sorts = ref<SortType[]>(unref(initialSorts) ?? [])
+    const groups = ref<GroupType[]>(/* unref(initialGroups) ?? */ [])
     const nestedFilters = ref<FilterType[]>(unref(initialFilters) ?? [])
 
     return {
@@ -81,6 +83,7 @@ const [useProvideSmartsheetStore, useSmartsheetStore] = useInjectionState(
       cellRefs,
       isSharedForm,
       sorts,
+      groups,
       nestedFilters,
       isSqlView,
       eventBus,

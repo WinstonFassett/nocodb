@@ -3,6 +3,7 @@ export * as tableService from './table.svc';
 export * as columnService from './column.svc';
 export * as filterService from './filter.svc';
 export * as sortService from './sort.svc';
+export * as groupService from './group.svc';
 export * as baseService from './base.svc';
 export * as apiTokenService from './apiToken.svc';
 export * as viewService from './view.svc';

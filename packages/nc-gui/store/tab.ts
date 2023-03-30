@@ -54,6 +54,7 @@ export const useTabs = defineStore('tabStore', () => {
 
         if (index === -1) {
           tab.sortsState = tab.sortsState || new Map()
+          tab.groupsState = tab.groupsState || new Map()
           tab.filterState = tab.filterState || new Map()
           tabs.value.push(tab)
           index = tabs.value.length - 1
@@ -88,6 +89,7 @@ export const useTabs = defineStore('tabStore', () => {
 
   const addTab = (tabMeta: TabItem) => {
     tabMeta.sortsState = tabMeta.sortsState || new Map()
+    tabMeta.groupsState = tabMeta.groupsState || new Map()
     tabMeta.filterState = tabMeta.filterState || new Map()
     const tabIndex = tabs.value.findIndex((tab) => tab.id === tabMeta.id)
     // if tab already found make it active

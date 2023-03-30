@@ -359,6 +359,8 @@
     },
     "sort": "Sort",
     "addSort": "Add Sort Option",
+    "group": "Group",
+    "addGroup": "Add Group Option",    
     "filter": "Filter",
     "addFilter": "Add Filter",
     "share": "Share",

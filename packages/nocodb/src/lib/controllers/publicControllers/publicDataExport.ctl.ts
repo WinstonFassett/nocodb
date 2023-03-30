@@ -128,7 +128,9 @@ async function getDbRows(model, view: View, req: Request) {
   try {
     listArgs.sortArr = JSON.parse(listArgs.sortArrJson);
   } catch (e) {}
-
+  try {
+    listArgs.groupArr = JSON.parse(listArgs.groupArrJson);
+  } catch (e) {}
   const base = await Base.get(model.base_id);
   const baseModel = await Model.getBaseModelSQL({
     id: model.id,

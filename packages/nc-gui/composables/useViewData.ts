@@ -77,7 +77,7 @@ export function useViewData(
 
   const { $api, $e } = useNuxtApp()
 
-  const { sorts, nestedFilters } = useSmartsheetStoreOrThrow()
+  const { sorts, groups, nestedFilters } = useSmartsheetStoreOrThrow()
 
   const { isUIAllowed } = useUIPermission()
 
@@ -194,10 +194,11 @@ export function useViewData(
           ...queryParams.value,
           ...params,
           ...(isUIAllowed('sortSync') ? {} : { sortArrJson: JSON.stringify(sorts.value) }),
+          ...(isUIAllowed('groupsSync') ? {} : { groupArrJson: JSON.stringify(groups.value) }),
           ...(isUIAllowed('filterSync') ? {} : { filterArrJson: JSON.stringify(nestedFilters.value) }),
           where: where?.value,
         })
-      : await fetchSharedViewData({ sortsArr: sorts.value, filtersArr: nestedFilters.value })
+      : await fetchSharedViewData({ sortsArr: sorts.value, groupsArr: groups.value, filtersArr: nestedFilters.value })
 
     formattedData.value = formatData(response.list)
     paginationData.value = response.pageInfo

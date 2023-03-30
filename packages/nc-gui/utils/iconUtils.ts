@@ -204,6 +204,7 @@ export const iconMap = {
   cloud: h('span', { class: 'material-symbols-outlined' }, 'cloud'),
   apiAndSupport: h('span', { class: 'material-symbols-outlined' }, 'api'),
   sort: h('span', { class: 'material-symbols-outlined', style: { transform: 'scaleY(-1)' } }, 'sort'),
+  group: h('span', { class: 'material-symbols-outlined', style: { transform: 'scaleY(-1)' } }, 'tab_group'),
   translate: h('span', { class: 'material-symbols-outlined' }, 'translate'),
   preview: h('span', { class: 'material-symbols-outlined' }, 'visibility'),
   link: h('span', { class: 'material-symbols-outlined' }, 'link'),

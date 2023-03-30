@@ -234,7 +234,9 @@ export async function getDbRows(param: {
   try {
     listArgs.sortArr = JSON.parse(listArgs.sortArrJson);
   } catch (e) {}
-
+  try {
+    listArgs.groupArr = JSON.parse(listArgs.groupArrJson);
+  } catch (e) {}
   for (
     elapsed = 0;
     elapsed < timeout;

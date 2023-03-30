@@ -29,6 +29,7 @@ export { default as QrCodeColumn } from './QrCodeColumn';
 export { default as RollupColumn } from './RollupColumn';
 export { default as SelectOption } from './SelectOption';
 export { default as Sort } from './Sort';
+export { default as Group } from './Group';
 export { default as Store } from './Store';
 export { default as SyncLogs } from './SyncLogs';
 export { default as SyncSource } from './SyncSource';

@@ -189,6 +189,9 @@ async function storeViewDetails(tableId) {
     let vSort = await api.dbTableSort.list(v.id);
     viewStore.sort[v.id] = vSort.sorts.list;
 
+    let vGroup = await api.dbTableGroup.list(v.id);
+    viewStore.group[v.id] = vGroup.groups.list;
+
     let vFilter = await api.dbTableFilter.read(v.id);
     viewStore.filter[v.id] = vFilter;
   }

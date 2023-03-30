@@ -34,7 +34,9 @@ export async function dataList(req: Request, res: Response) {
   try {
     listArgs.sortArr = JSON.parse(listArgs.sortArrJson);
   } catch (e) {}
-
+  try {
+    listArgs.groupArr = JSON.parse(listArgs.groupArrJson);
+  } catch (e) {}
   const data = await nocoExecute(
     requestObj,
     await baseModel.list(listArgs),
