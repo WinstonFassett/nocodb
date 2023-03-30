@@ -22,6 +22,7 @@ import Filter from './Filter';
 import QrCodeColumn from './QrCodeColumn';
 import BarcodeColumn from './BarcodeColumn';
 import type { ColumnReqType, ColumnType } from 'nocodb-sdk';
+import Group from './Group';
 
 export default class Column<T = any> implements ColumnType {
   public fk_model_id: string;
@@ -717,6 +718,20 @@ export default class Column<T = any> implements ColumnType {
       }
       for (const sort of sorts) {
         await Sort.delete(sort.id, ncMeta);
+      }
+    }
+    // delete groups
+    {
+      let groups = await NocoCache.getList(CacheScope.GROUP, [id]);
+      if (!groups.length) {
+        groups = await ncMeta.metaList2(null, null, MetaTable.GROUP, {
+          condition: {
+            fk_column_id: id,
+          },
+        });
+      }
+      for (const group of groups) {
+        await Group.delete(group.id, ncMeta);
       }
     }
     // delete filters

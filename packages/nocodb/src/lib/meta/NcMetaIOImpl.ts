@@ -816,6 +816,9 @@ export default class NcMetaIOImpl extends NcMetaIO {
       case MetaTable.SORT:
         prefix = 'so_';
         break;
+        case MetaTable.GROUP:
+          prefix = 'gr_';
+          break;        
       case MetaTable.SHARED_VIEWS:
         prefix = 'sv_';
         break;
