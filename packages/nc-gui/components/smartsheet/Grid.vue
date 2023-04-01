@@ -850,14 +850,12 @@ const closeAddColumnDropdown = () => {
           <tbody ref="tbodyEl">
             <LazySmartsheetRow v-for="(row, rowIndex) of viewData" ref="rowRefs" :key="rowIndex" :row="row">
               <template #default="{ state }">
-                <tr v-if="row.group" class="nc-grouping-row" :data-groupid="`grouping-${ row.group.value }`">
+                <tr v-if="row.group" class="nc-group-row" :data-groupid="`grouping-${ row.group.value }`">
                   <td class="nc-grouping-cell"><div></div></td>
                   <td class="nc-grouping-cell">
                     <div class="grouping-cell-container flex">
                       <!-- {{ row.row[groupName] }} -->
-                      <div class="grouping-spacer" v-for="group in row.group.index">
-                        ➡️  
-                      </div>
+                      <div class="grouping-spacer" v-for="group in row.group.index" />
                       <div v-if="!switchingTab" class="grouping-cell-body w-full h-full" :set="columnObj = row.group.field">
                         <LazySmartsheetVirtualCell
                           v-if="isVirtualCol(columnObj)"
@@ -886,7 +884,7 @@ const closeAddColumnDropdown = () => {
                   <td v-for="(columnObj, colIndex) of fields"
                     :key="columnObj.id">
                     <div class="grouping-cell-container">
-                      soon: stats                
+                      <!-- soon: stats                 -->
                     </div>
                   </td>
                 </tr>
@@ -969,9 +967,7 @@ const closeAddColumnDropdown = () => {
                     @contextmenu="showContextMenu($event, { row: rowIndex, col: colIndex })"
                   >
                     <div class="flex">
-                      <div v-if="colIndex === 0" class="grouping-spacer h-full" v-for="group in groups">
-                        ➡️  
-                      </div>
+                      <div v-if="colIndex === 0" class="grouping-spacer h-full" v-for="group in groups" />
                       <div v-if="!switchingTab" class="w-full h-full">
                         <LazySmartsheetVirtualCell
                           v-if="isVirtualCol(columnObj)"
@@ -1183,59 +1179,61 @@ const closeAddColumnDropdown = () => {
     background: white;
     @apply border-r-2 border-r-gray-300;
   }
-  tbody tr.nc-grouping-row {
-    background: rgba(255,255,255,0.8)
-  }
+  .grouping-old {
+    tbody tr.nc-grouping-row {
+      background: rgba(255,255,255,0.8)
+    }
 
-  tbody tr.nc-grouping-row,
-  tbody tr.nc-grouping-row > td  {
-    // position: sticky;
-    top: 40px;
-    z-index: 10;
-    // padding-top: 10px;
-    border: none;
-    border-top: 20px solid white;
-  }
+    tbody tr.nc-grouping-row,
+    tbody tr.nc-grouping-row > td  {
+      // position: sticky;
+      top: 40px;
+      z-index: 10;
+      // padding-top: 10px;
+      border: none;
+      border-top: 20px solid white;
+    }
 
-  .nc-grouping-row > td {
-    border: solid 1px #ccc;
-    padding: 0;
-  }
-  tbody tr.nc-grouping-row > td.nc-grouping-cell  {
-    z-index: 11;
-  }
-  .nc-grouping-cell  {
-    // width: 100%;
-    // display: flex;
-    // align-items: center;
-  
-  }
-  .nc-grouping-row:not(:first-child) > td {
-    // padding-top: 1em;;
-  }
-  .nc-grouping-row > td > div {
-    height: 100%;
-    // background-color: #ccc;
-    // padding: 1em;
-  }
+    .nc-grouping-row > td {
+      border: solid 1px #ccc;
+      padding: 0;
+    }
+    tbody tr.nc-grouping-row > td.nc-grouping-cell  {
+      z-index: 11;
+    }
+    .nc-grouping-cell  {
+      // width: 100%;
+      // display: flex;
+      // align-items: center;
+    
+    }
+    .nc-grouping-row:not(:first-child) > td {
+      // padding-top: 1em;;
+    }
+    .nc-grouping-row > td > div {
+      height: 100%;
+      // background-color: #ccc;
+      // padding: 1em;
+    }
 
-  .nc-grouping-row > td:first-child > div {
-    // border-top-left-radius: 10px;
-  }
+    .nc-grouping-row > td:first-child > div {
+      // border-top-left-radius: 10px;
+    }
 
-  .nc-grouping-row ~ tr.nc-grid-row > td:first-child {
-    // border-left: solid 1px #ccc;
-    border-bottom: none;
-  }
-  .nc-grouping-row ~ tr.nc-grid-row:last-child > td:first-child {
-    border-left: solid 1px #ccc;
-  }
-  .grouping-cell-body {
-    border: solid 1px #ccc;
-  }
-  .grouping-spacer {
-    background: none;
-    border-left: solid 1px #ccc;
+    .nc-grouping-row ~ tr.nc-grid-row > td:first-child {
+      // border-left: solid 1px #ccc;
+      border-bottom: none;
+    }
+    .nc-grouping-row ~ tr.nc-grid-row:last-child > td:first-child {
+      border-left: solid 1px #ccc;
+    }
+    .grouping-cell-body {
+      border: solid 1px #ccc;
+    }
+    .grouping-spacer {
+      background: none;
+      border-left: solid 1px #ccc;
+    }
   }
 }
 
