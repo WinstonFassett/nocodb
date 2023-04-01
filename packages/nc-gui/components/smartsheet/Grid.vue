@@ -123,6 +123,10 @@ const {
 } = useViewData(meta, view, xWhere)
 console.log({ data, paginationData, navigateToSiblingRow })
 
+const isGrouping = computed(() => {
+  return groups.value?.length > 0
+})
+
 // let groupName = groups.value[0]
 const viewData = computed(() => {
   const arr = data.value
@@ -155,14 +159,27 @@ const viewData = computed(() => {
       const value = row.row[field.title!] // index probably better(?)
       const prevValue = currentRowGroupValues[index]
       console.log('compare', prevValue, value)
-      if (groupsChanged || prevValue === null || value !== prevValue) {
+      
+      // if changed for this field, then predecessor had last of it
+      // so predecessor is last of that field, shows border in spacer
+      
+      if (prevValue === null || value !== prevValue) {
         groupsChanged = true
         console.log('group changed', field.title, value)
+        const previousRow = acc.length && acc[acc.length-1]
+        if (previousRow) {
+          console.log('previous row ended group', index, field.title)
+          previousRow.endsGroup ||= { index }
+        }
+        console.log({ previousRow })
+      }
+      if (groupsChanged) {
         acc.push({
           group: { index, setting: group, field, value },
           ...row,
           row: {
             ...row.row,
+            index: i,
             [field.title!]: value ?? '(Empty)'
           }
         })
@@ -184,7 +201,13 @@ const viewData = computed(() => {
     //     rowMeta: {...row.rowMeta}
     //   } as any)
     // }
-    acc.push(row)
+    acc.push({
+      ...row,
+      row: {
+        ...row.row,
+        index: i,        
+      }
+    })
     return acc
   }, [] as typeof arr)
 })
@@ -771,7 +794,7 @@ const closeAddColumnDropdown = () => {
       </div>
     </general-overlay>
 
-    <div ref="gridWrapper" class="nc-grid-wrapper min-h-0 flex-1 scrollbar-thin-dull">
+    <div ref="gridWrapper" :class="{ grouped: isGrouping }" class="nc-grid-wrapper min-h-0 flex-1 scrollbar-thin-dull">
       <a-dropdown
         v-model:visible="contextMenu"
         :trigger="isSqlView ? [] : ['contextmenu']"
@@ -848,11 +871,18 @@ const closeAddColumnDropdown = () => {
             </tr>
           </thead>
           <tbody ref="tbodyEl">
-            <LazySmartsheetRow v-for="(row, rowIndex) of viewData" ref="rowRefs" :key="rowIndex" :row="row">
+            <LazySmartsheetRow v-for="(row, viewRowIndex) of viewData" ref="rowRefs" :key="viewRowIndex" :row="row" :rowIndex="row.row.index">
               <template #default="{ state }">
+                <tr class="group-end" v-if="row.group && row.row.index > 0">
+                  <td>{{ rowIndex }}</td>
+                  <td>
+                    <div class="grouping-spacer" v-for="group in row.group.index" />
+                  </td>
+                  <td :colspan="visibleColLength - 1">end {{ row.group.index }} {{ row.group.value }}</td>
+                </tr>
                 <tr v-if="row.group" class="nc-group-row" :data-groupid="`grouping-${ row.group.value }`">
-                  <td class="nc-grouping-cell"><div></div></td>
-                  <td class="nc-grouping-cell">
+                  <td><div></div></td>
+                  <td>
                     <div class="grouping-cell-container flex">
                       <!-- {{ row.row[groupName] }} -->
                       <div class="grouping-spacer" v-for="group in row.group.index" />
@@ -883,7 +913,7 @@ const closeAddColumnDropdown = () => {
                   </td>
                   <td v-for="(columnObj, colIndex) of fields"
                     :key="columnObj.id">
-                    <div class="grouping-cell-container">
+                    <div class="grouping-cell-body">
                       <!-- soon: stats                 -->
                     </div>
                   </td>
@@ -891,7 +921,8 @@ const closeAddColumnDropdown = () => {
                 <tr v-else
                   class="nc-grid-row"
                   :style="{ height: rowHeight ? `${rowHeight * 1.5}rem` : `1.5rem` }"
-                  :data-testid="`grid-row-${rowIndex}`"
+                  :rowIndex="row.row.index"
+                  :data-testid="`grid-row-${row.row.index}`"
                 >
                   <td key="row-index" class="caption nc-grid-cell pl-5 pr-1" :data-testid="`cell-Id-${rowIndex}`">
                     <div class="items-center flex gap-1 min-w-[55px] h-full">
@@ -900,7 +931,7 @@ const closeAddColumnDropdown = () => {
                         class="nc-row-no text-xs text-gray-500"
                         :class="{ toggle: !readOnly, hidden: row.rowMeta.selected }"
                       >
-                        {{ ((paginationData.page ?? 1) - 1) * (paginationData.pageSize ?? 25) + rowIndex + 1 }}
+                        {{ ((paginationData.page ?? 1) - 1) * (paginationData.pageSize ?? 25) + row.row.index + 1 }}
                       </div>
                       <div
                         v-if="!readOnly"
@@ -967,34 +998,40 @@ const closeAddColumnDropdown = () => {
                     @contextmenu="showContextMenu($event, { row: rowIndex, col: colIndex })"
                   >
                     <div class="flex">
-                      <div v-if="colIndex === 0" class="grouping-spacer h-full" v-for="group in groups" />
-                      <div v-if="!switchingTab" class="w-full h-full">
-                        <LazySmartsheetVirtualCell
-                          v-if="isVirtualCol(columnObj)"
-                          v-model="row.row[columnObj.title]"
-                          :column="columnObj"
-                          :active="activeCell.col === colIndex && activeCell.row === rowIndex"
-                          :row="row"
-                          :read-only="readOnly"
-                          @navigate="onNavigate"
-                          @save="updateOrSaveRow(row, '', state)"
-                        />
-  
-                        <LazySmartsheetCell
-                          v-else
-                          v-model="row.row[columnObj.title]"
-                          :column="columnObj"
-                          :edit-enabled="
-                            !!hasEditPermission && !!editEnabled && activeCell.col === colIndex && activeCell.row === rowIndex
-                          "
-                          :row-index="rowIndex"
-                          :active="activeCell.col === colIndex && activeCell.row === rowIndex"
-                          :read-only="readOnly"
-                          @update:edit-enabled="editEnabled = $event"
-                          @save="updateOrSaveRow(row, columnObj.title, state)"
-                          @navigate="onNavigate"
-                          @cancel="editEnabled = false"
-                        />
+                      <template v-if="colIndex === 0" v-for="(group, index) in groups">
+                        <div class="grouping-spacer h-full" :class="{ end: row.endsGroup?.index == index-1 }">
+                        {{ row.endsGroup?.index }}
+                        </div>
+                      </template>
+                      <div v-if="!switchingTab" class="cell-body h-full flex-1 flex items-center px-2">
+                        <div>
+                          <LazySmartsheetVirtualCell
+                            v-if="isVirtualCol(columnObj)"
+                            v-model="row.row[columnObj.title]"
+                            :column="columnObj"
+                            :active="activeCell.col === colIndex && activeCell.row === rowIndex"
+                            :row="row"
+                            :read-only="readOnly"
+                            @navigate="onNavigate"
+                            @save="updateOrSaveRow(row, '', state)"
+                          />
+    
+                          <LazySmartsheetCell
+                            v-else
+                            v-model="row.row[columnObj.title]"
+                            :column="columnObj"
+                            :edit-enabled="
+                              !!hasEditPermission && !!editEnabled && activeCell.col === colIndex && activeCell.row === rowIndex
+                            "
+                            :row-index="rowIndex"
+                            :active="activeCell.col === colIndex && activeCell.row === rowIndex"
+                            :read-only="readOnly"
+                            @update:edit-enabled="editEnabled = $event"
+                            @save="updateOrSaveRow(row, columnObj.title, state)"
+                            @navigate="onNavigate"
+                            @cancel="editEnabled = false"
+                          />
+                        </div>
                       </div>
                     </div>
                   </SmartsheetTableDataCell>
@@ -1179,6 +1216,90 @@ const closeAddColumnDropdown = () => {
     background: white;
     @apply border-r-2 border-r-gray-300;
   }
+
+  &.grouped {
+    background-color: lightblue;
+
+    .grouping-spacer {
+      background: none;
+      width: 1em;
+      border-right: solid 1px #ccc;
+      flex-shrink: 0;
+      &.end {
+        background: red;
+        border-bottom: solid 1px #ccc;
+      }
+    }
+    :where(td,th):where(:first-child, :nth-child(2)) {
+      border: none;
+      padding: 0;
+    }
+    td:first-child {
+      border-right: 1px solid #ccc;
+    }
+    .nc-group-row {
+      td {
+        padding: 0;
+      }
+    }
+
+    td:nth-child(2) > div {
+      padding: 0;
+      height: 100%;
+    }
+
+    td:nth-child(2) .cell-body {
+      /* background: pink; */
+      border-bottom: 1px solid #eee;
+      border-right: 1px solid #eee;
+    }
+
+    td:nth-child(2).active::after {
+      content: '';
+      position: absolute;
+      z-index: 3;
+      height: calc(100% + 2px);
+      width: calc(100% + 2px);
+      left: -1px;
+      top: -1px;
+      pointer-events: none;
+      display: none;
+    }
+    td:nth-child(2).active .cell-body {
+      background: lightgreen;
+      position: relative;
+    }
+    td:nth-child(2).active .cell-body::after {
+      content: '';
+      position: absolute;
+      z-index: 3;
+      height: 100%;
+      width: 100%;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      // display: none;
+    }
+    td:nth-child(2).active .cell-body::after {
+      @apply border-1 border-solid text-primary border-current bg-primary bg-opacity-5;
+    }
+    
+    .grouping-cell-body {
+      background: lightblue;
+      height: 100%;
+      // border: solid 1px #ccc;
+      @apply p-2
+    }
+    td:nth-child(2) .grouping-cell-body {
+      border-right-width: 1px;
+      border-bottom-width: 1px;
+      border-color: rgba(229, 231, 235, var(--tw-border-opacity));
+    }
+
+  }
+
+
+
   .grouping-old {
     tbody tr.nc-grouping-row {
       background: rgba(255,255,255,0.8)
@@ -1227,13 +1348,7 @@ const closeAddColumnDropdown = () => {
     .nc-grouping-row ~ tr.nc-grid-row:last-child > td:first-child {
       border-left: solid 1px #ccc;
     }
-    .grouping-cell-body {
-      border: solid 1px #ccc;
-    }
-    .grouping-spacer {
-      background: none;
-      border-left: solid 1px #ccc;
-    }
+
   }
 }
 
