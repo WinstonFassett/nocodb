@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { ColumnReqType, ColumnType, GridType, TableType, ViewType } from 'nocodb-sdk'
+import type { ColumnReqType, ColumnType, GridType, GroupType, TableType, ViewType } from 'nocodb-sdk'
 import { UITypes, isVirtualCol } from 'nocodb-sdk'
 import {
   ActiveViewInj,
@@ -123,93 +123,167 @@ const {
 } = useViewData(meta, view, xWhere)
 console.log({ data, paginationData, navigateToSiblingRow })
 
-const isGrouping = computed(() => {
-  return groups.value?.length > 0
+const groupCount = computed(() => {
+  return groups.value?.length ?? 0
 })
 
-// let groupName = groups.value[0]
-const viewData = computed(() => {
-  const arr = data.value
-  const groupsArr = groups.value
-  if (groupsArr.length === 0 || arr.length === 0) return arr
-  
-  let currentRowGroupValues = new Array(groupsArr.length)
+const isGrouping = computed(() => {
+  return groupCount.value > 0
+})
 
-  let grouping = groupsArr[0]
-  console.log({ grouping })
-  const { fk_column_id } = grouping
-  const field = fields.value.find(field => field.id === fk_column_id )
-  console.log({ field })
-  let curGroup: any
-  const groupTitle = field!.title
-  const groupFields = groupsArr.map(group => {
+const groupFields = computed(() => {
+  const groupFields = []  as FieldGroup[]
+  groups.value?.forEach(group => {
     const { fk_column_id } = group
-    const field = fields.value.find(field => field.id === fk_column_id )!
-    const groupTitle = field!.title
-    return { group, field }
+    if (fk_column_id) {
+      const field = fields.value.find(field => field.id === fk_column_id )!
+      groupFields.push({ group, field })
+    }
   })
-  return arr.reduce((acc, row, i) => {
-    // console.log({ row: toRaw(row) })
-    // const rowGroupValues = groupFields.map(({ group, field }) => {
-    //   const value = row.row[field.title!]
-    //   return { group, field, value }
-    // })
+  return Object.freeze(groupFields)
+})
+
+interface FieldGroup {
+  field: ColumnType
+  group: GroupType
+}
+
+// enum GroupedViewPartType {
+//   GroupStart,
+//   Row,
+//   GroupEnd,
+// }
+// interface GroupedViewItem {
+//   type: GroupedViewPartType
+//   row: Row
+//   rowIndex: number
+//   group?: GroupType
+//   groupIndex?: number,
+//   value: any
+//   // field: ColumnType
+// }
+
+// interface RowGroupPart {
+//   type: GroupedViewPartType
+//   group?: GroupType
+//   groupIndex?: number,
+//   groupValue?: any
+// }
+
+interface RowGroupEnhancement {
+  groupsStarting: number[]
+  groupsEnded: number[]
+}
+
+interface RowGroupValue {
+  row: Row
+  rowIndex: number
+  groupIndex: number
+  groupValue: any
+}
+
+const finalRowIndex = computed(() => {
+  const { isLastPage } = paginationData.value
+  const rowCount = data.value.length
+  return isLastPage ? rowCount-1 : -1
+})
+
+// create flattened, frozen view derived from data
+const rowsWithGroups = computed(() => {
+  const rows = data.value
+  const rowCount = rows.length
+  const groupFieldsArr = groupFields.value  
+  if (!groupFieldsArr || groupFieldsArr.length === 0 || rowCount === 0) return null
+  let activeGroupValueStack = [] as any[]
+  let currentRowGroupValues = new Array(groupFieldsArr.length)
+
+  const { isLastPage } = paginationData.value
+  console.log({ isLastPage })
+  const enhancedRows = rows.map((row, rowIndex) => {
+    // let parts = [] as RowGroupPart[]
+    // const groupsEnding = [] as RowGroupPart[]    
+    const groupsStarting = [] as number[]
+    let groupsEnded = []
     let groupsChanged = false
-    groupFields.forEach(({ group, field }, index) => {
-      const value = row.row[field.title!] // index probably better(?)
-      const prevValue = currentRowGroupValues[index]
-      console.log('compare', prevValue, value)
-      
-      // if changed for this field, then predecessor had last of it
-      // so predecessor is last of that field, shows border in spacer
-      
-      if (prevValue === null || value !== prevValue) {
-        groupsChanged = true
-        console.log('group changed', field.title, value)
-        const previousRow = acc.length && acc[acc.length-1]
-        if (previousRow) {
-          console.log('previous row ended group', index, field.title)
-          previousRow.endsGroup ||= { index }
-        }
-        console.log({ previousRow })
-      }
-      if (groupsChanged) {
-        acc.push({
-          group: { index, setting: group, field, value },
-          ...row,
-          row: {
-            ...row.row,
-            index: i,
-            [field.title!]: value ?? '(Empty)'
-          }
-        })
-        currentRowGroupValues[index] = value
-      }
-    })
-    // const group = row.row[groupTitle] ?? '(Empty)'
-    // if (!curGroup || group !== curGroup) {
-    //   curGroup = group
-    //   const { ncRecordId } = row.row
-    //   acc.push({
-    //     grouping: true,
-    //     row: {
-    //       ...row,
-    //       ncRecordId: group,
-    //       groupTitle: groupTitle,
-    //     },
-    //     oldRow: {...row.oldRow},
-    //     rowMeta: {...row.rowMeta}
-    //   } as any)
+    // const isLastRow = rowIndex+1 === rowCount
+    // const isLastOfAllRows = isLastPage && isLastRow
+    // if (isLastRow) {
+    //   console.log({ isLastRow, isLastPage, isLastOfAllRows })
     // }
-    acc.push({
-      ...row,
-      row: {
-        ...row.row,
-        index: i,        
+
+    groupFieldsArr.forEach(({ group, field }, groupIndex) => {
+      console.log(activeGroupValueStack)
+      const groupValue = row.row[field.title!] // index probably better(?)
+      // const hasPrevValue = activeGroupValueStack.length > 0
+      // const prevValue = activeGroupValueStack.pop()
+      const prevRowGroupValue = currentRowGroupValues[groupIndex]
+      const prevValue = prevRowGroupValue?.groupValue
+      currentRowGroupValues[groupIndex] = {
+        rowIndex,
+        groupValue
       }
+      // last row of entire recordset ends all groups
+      // if (rowIndex+1 === rowCount) {
+    
+      // activeGroupValueStack.push(groupValue)
+      if (groupsChanged || !prevRowGroupValue || groupValue !== prevRowGroupValue.groupValue) {
+        groupsChanged = true
+        if (prevRowGroupValue) {
+          console.log('group ended', field.title, groupValue, prevValue)
+          groupsEnded.push({
+            groupIndex,
+            ...prevRowGroupValue
+          })
+          // groupsEnding.push({
+          //   type: GroupedViewPartType.GroupStart,
+          //   group,
+          //   groupIndex,
+          //   groupValue
+          // })
+        }
+        
+        // parts.push({
+        //   type: GroupedViewPartType.GroupStart,
+        //   group,
+        //   groupIndex,          
+        //   groupValue
+        // })        
+        console.log('group started', field.title, groupValue, prevValue)
+        groupsStarting.push(groupIndex)
+      }
+      
+      //   console.log('last row', row)
+
+
+      // if (groupsChanged) {
+      // }
+      // useful?
+      // rowGroupValues.push(value)
     })
-    return acc
-  }, [] as typeof arr)
+    // parts.push({
+    //   type: GroupedViewPartType.Row      
+    // })
+    // parts = parts.concat(groupsEnding.reverse())
+    
+    
+    //   groupsEnded = groupFieldsArr.map((it, index) => index)
+    // }
+    groupsEnded.pop()
+    return Object.freeze({
+      ...row,
+      rowIndex,
+      groupsStarting: Object.freeze(groupsStarting),
+      groupsEnded: Object.freeze(groupsEnded.reverse()),
+    })
+  })
+  return Object.freeze(enhancedRows)
+})
+
+const viewData = computed(() => {
+  if (groups.value.length > 0) {
+    return rowsWithGroups.value
+  }
+  return data.value
 })
 
 const { getMeta } = useMetas()
@@ -784,6 +858,13 @@ const closeAddColumnDropdown = () => {
   columnOrder.value = null
   addColumnDropdown.value = false
 }
+
+function isEmpty (v: any) {
+  return v === undefined || v === null || v === ""
+}
+function coerceEmpty(v: any) {
+  return isEmpty(v) ? "(Empty)" : v
+}
 </script>
 
 <template>
@@ -871,70 +952,86 @@ const closeAddColumnDropdown = () => {
             </tr>
           </thead>
           <tbody ref="tbodyEl">
-            <LazySmartsheetRow v-for="(row, viewRowIndex) of viewData" ref="rowRefs" :key="viewRowIndex" :row="row" :rowIndex="row.row.index">
+            <LazySmartsheetRow v-for="(row, rowIndex) of viewData" ref="rowRefs" :key="rowIndex" :row="row">
               <template #default="{ state }">
-                <tr class="group-end" v-if="row.group && row.row.index > 0">
-                  <td>{{ rowIndex }}</td>
+                <tr v-if="isGrouping" class="group-end" v-for="{groupIndex, groupValue, rowIndex } in row.groupsEnded">
+                  <td></td>
                   <td>
-                    <div class="flex">
-                      <div class="grouping-spacer" v-for="group in row.group.index+1" />
+                    <div class="flex">                      
+                      <template v-for="spacerOffset in ((groupIndex + 1))">
+                        <div class="grouping-spacer h-full" :class="{ end: spacerOffset===(groupIndex+1) }">
+                          <!-- {{ `${spacerOffset},${groupOffset}` }} -->
+                          <!-- {{ groupIndex }} -->
+                        </div>
+                      </template>                      
+                      
                       <div class="grouping-cell-body flex-1"/>
                     </div>
                   </td>
-                  <td :colspan="visibleColLength - 1">end {{ row.group.index }} {{ row.group.value }}</td>
-                </tr>
-                <tr class="group-begin" v-if="row.group">
-                  <td>{{ rowIndex }}</td>
-                  <td>
-                    <div class="flex">
-                      <div class="grouping-spacer" v-for="group in row.group.index" />
-                    </div>
+                  <td :colspan="visibleColLength - 1">
+                    <!-- end {{ groupIndex }}  {{ data[rowIndex][groupFields[groupIndex]!.field.title!] }} {{  groupValue }} from row {{  rowIndex }} -->
                   </td>
-                  <td :colspan="visibleColLength - 1">begin {{ row.group.index }} {{ row.group.value }}</td>
-                </tr>                
-                <tr v-if="row.group" class="nc-group-row" :data-groupid="`grouping-${ row.group.value }`">
-                  <td><div></div></td>
-                  <td>
-                    <div class="grouping-cell-container flex">
-                      <!-- {{ row.row[groupName] }} -->
-                      <div class="grouping-spacer" v-for="group in row.group.index" />
-                      <div v-if="!switchingTab" class="grouping-cell-body w-full h-full" :set="columnObj = row.group.field">
-                        <LazySmartsheetVirtualCell
-                          v-if="isVirtualCol(columnObj)"
-                          v-model="row.row[columnObj.title]"
-                          :column="columnObj"
-                          :row="row"
-                          :read-only="true"
-                          @navigate="onNavigate"
-                          @save="updateOrSaveRow(row, '', state)"
-                        />
+                </tr>
 
-                        <LazySmartsheetCell
-                          v-else
-                          v-model="row.row[columnObj.title]"
-                          :column="columnObj"
-                          :row-index="rowIndex"
-                          :read-only="true"
-                          @update:edit-enabled="editEnabled = $event"
-                          @save="updateOrSaveRow(row, columnObj.title, state)"
-                          @navigate="onNavigate"
-                          @cancel="editEnabled = false"
-                        />
-                      </div>                      
-                    </div>
-                  </td>
-                  <td v-for="(columnObj, colIndex) of fields"
-                    :key="columnObj.id">
-                    <div class="grouping-cell-body">
-                      <!-- soon: stats                 -->
-                    </div>
-                  </td>
-                </tr>
-                <tr v-else
+                <template v-if="isGrouping" v-for="groupIndex in row.groupsStarting">
+                  <tr class="group-begin">
+                    <td></td>
+                    <td>
+                      <div class="flex">
+                        <div class="grouping-spacer" v-for="offset in groupIndex">
+                          <!-- {{ offset }} -->
+                        </div>
+                      </div>
+                    </td>
+                    <td :colspan="visibleColLength - 1">
+                      <!-- begin {{ groupIndex }} {{ row.row[groupFields[groupIndex]!.field.title!] }} -->
+                    </td>
+                  </tr>                
+                  <tr class="nc-group-row">
+                    <td><div></div></td>
+                    <td>
+                      <div class="grouping-cell-container flex">
+                        <!-- {{ row.row[groupName] }} -->
+                        <div class="grouping-spacer" v-for="index in groupIndex" />
+                        <div v-if="!switchingTab" class="grouping-cell-body w-full h-full" :set="columnObj = groupFields[groupIndex].field">
+                          <!-- <span v-if="isEmpty(row.row[columnObj.title])">(Empty)</span> -->
+                          <LazySmartsheetVirtualCell
+                            v-if="isVirtualCol(columnObj)"
+                            :modelValue="coerceEmpty(row.row[columnObj.title])"
+                            :column="columnObj"
+                            :row="row"
+                            :read-only="true"
+                            @navigate="onNavigate"
+                            @save="updateOrSaveRow(row, '', state)"
+                          />
+
+                          <LazySmartsheetCell
+                            v-else
+                            :modelValue="coerceEmpty(row.row[columnObj.title])"
+                            :column="columnObj"
+                            :row-index="rowIndex"
+                            :read-only="true"
+                            @update:edit-enabled="editEnabled = $event"
+                            @save="updateOrSaveRow(row, columnObj.title, state)"
+                            @navigate="onNavigate"
+                            @cancel="editEnabled = false"
+                          />
+                        </div>                      
+                      </div>
+                    </td>
+                    <td v-for="(columnObj, colIndex) of fields"
+                      :key="columnObj.id">
+                      <div class="grouping-cell-body">
+                        <!-- soon: stats                 -->
+                      </div>
+                    </td>
+                  </tr>
+                </template>       
+                
+                <tr
                   class="nc-grid-row"
-                  :style="{ height: rowHeight ? `${rowHeight * 1.5}rem` : `1.5rem` }"
-                  :rowIndex="row.row.index"
-                  :data-testid="`grid-row-${row.row.index}`"
+                  :style="{ height: rowHeight ? `${rowHeight * 1.5}rem` : `1.5rem` }"                  
+                  :data-testid="`grid-row-${rowIndex}`"
                 >
                   <td key="row-index" class="caption nc-grid-cell pl-5 pr-1" :data-testid="`cell-Id-${rowIndex}`">
                     <div class="items-center flex gap-1 min-w-[55px] h-full">
@@ -943,7 +1040,7 @@ const closeAddColumnDropdown = () => {
                         class="nc-row-no text-xs text-gray-500"
                         :class="{ toggle: !readOnly, hidden: row.rowMeta.selected }"
                       >
-                        {{ ((paginationData.page ?? 1) - 1) * (paginationData.pageSize ?? 25) + row.row.index + 1 }}
+                        {{ ((paginationData.page ?? 1) - 1) * (paginationData.pageSize ?? 25) + rowIndex + 1 }}
                       </div>
                       <div
                         v-if="!readOnly"
@@ -1010,11 +1107,11 @@ const closeAddColumnDropdown = () => {
                     @contextmenu="showContextMenu($event, { row: rowIndex, col: colIndex })"
                   >
                     <div class="flex">
-                      <template v-if="isGrouping && colIndex === 0" v-for="index in groups.length - 1">
-                        <div class="grouping-spacer h-full" :class="{ end: row.endsGroup?.index == index-1 }" />
+                      <template v-if="isGrouping && colIndex === 0" v-for="index in groupCount - 1">
+                        <div class="grouping-spacer h-full" :class="{ end: row.groupsEnded.includes(index) }" />
                       </template>
                       <div v-if="!switchingTab" class="cell-body h-full flex-1 flex items-center px-2">
-                        <div>
+                        <div>                          
                           <LazySmartsheetVirtualCell
                             v-if="isVirtualCol(columnObj)"
                             v-model="row.row[columnObj.title]"
@@ -1046,6 +1143,24 @@ const closeAddColumnDropdown = () => {
                     </div>
                   </SmartsheetTableDataCell>
                 </tr>
+         
+                <tr v-if="isGrouping && rowIndex === finalRowIndex" class="group-end final" v-for="groupOffset in groupFields.length-1">
+                  <td></td>
+                  <td>
+                    <div class="flex">                      
+                      <template v-for="spacerOffset in (groupCount - groupOffset)">
+                        <div class="grouping-spacer h-full" :class="{ end: spacerOffset===(groupCount-groupOffset) }">
+                          <!-- {{ `${spacerOffset},${groupOffset}` }} -->
+                        </div>
+                      </template>
+                      
+                      <div class="grouping-cell-body flex-1"/>
+                    </div>
+                  </td>
+                  <td :colspan="visibleColLength - 1">
+                    <!-- end {{ groupIndex }}  {{ data[rowIndex][groupFields[groupIndex]!.field.title!] }} {{  groupValue }} from row {{  rowIndex }} -->
+                  </td>
+                </tr>                
               </template>
             </LazySmartsheetRow>
 
@@ -1231,13 +1346,14 @@ const closeAddColumnDropdown = () => {
     background-color: lightblue;
 
     .grouping-spacer {
-      background: none;
-      width: 1em;
-      border-left: solid 1px #ccc;
+      // background: lightgoldenrodyellow;
+      width: 1em;      
+      @apply border-gray-200 border-solid border-l;
       flex-shrink: 0;
       &.end {
-        // background: red;
+        // background: pink;
         // border-bottom: solid 1px #ccc;
+        @apply border-b
       }
     }
     :where(td,th):where(:first-child, :nth-child(2)) {
@@ -1265,7 +1381,9 @@ const closeAddColumnDropdown = () => {
     td:nth-child(2) .cell-body {
       /* background: pink; */
       border-bottom: 1px solid #e1e4e8;
-      border-right: 1px solid #e1e4e8;
+      
+      @apply border-r-1 border-r-gray-300;
+
       border-left: 1px solid #e1e4e8;
       1px solid #E1E4E8
     }
@@ -1312,23 +1430,65 @@ const closeAddColumnDropdown = () => {
       border-color: rgba(229, 231, 235, var(--tw-border-opacity));
     }
 
-    tr.group-begin,
-    tr.group-end {
+    tr.group-begin, tr.group-end {
+      th, td {
+        height: 10px !important;
+      }      
       :where(td,th):nth-child(2) {       
         border-right-width: 0;
+        border-bottom-width: 0;
+      }
+    }
+    tr.group-separator {
+      th, td {
+        height: 12px !important;
       }
     }
     tr.group-end {
-      background: rgba(0,200,0,0.2);
+      // background: rgba(200,0,0,0.2);
+      // .grouping-spacer:last-of-type {
+      //   background-color: green;
+      //   border-bottom: solid 1px ;
+      // }
       td {
-        // border-width: 0 1px 1px 1px;
+        border-width: 0;
+        border-bottom-width: 1px;
+        .grouping-cell-body {
+          border-right-width: 0;
+        }
+      }
+      // .grouping-spacer {
+      //   border-bottom-width: 1px;
+      // }
+      td:first-child {
+        border-bottom-width: 0;
       }
       :where(td,th):where(:first-child, :nth-child(2)) {
         border-width: 0;
         padding: 0;
+        
+      }
+      &.final {
+        .grouping-spacer {
+          border-bottom-width: 0;
+        }
+        .end {
+          // background-color: pink;
+          @apply border-gray-200 border-solid border-b;
+        }
+        // td:where(:nth-child(2), :last-child) {
+        //   @apply border-gray-200 border-solid border-l border-r;
+        // }
+        // .grouping-spacer {
+        //   border-left-width: 0;
+        // }
+        // .grouping-spacer:first-child {
+        //   border-left-width: 1px;;
+        // }
       }
     }
     tr.group-begin {
+      // background: rgba(0,200,0,0.2);
       :where(td,th):nth-child(1) {
         border-width: 0;
       }
