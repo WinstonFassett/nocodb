@@ -1022,8 +1022,8 @@ function coerceEmpty(v: any) {
                         </div>                      
                       </div>
                     </td>
-                    <td v-for="(columnObj, colIndex) of fields"
-                      :key="columnObj.id">
+                    <td v-for="offset of fields.length-1"
+                      :key="offset">
                       <div class="grouping-cell-body">
                         <!-- soon: stats                 -->
                       </div>
@@ -1266,7 +1266,11 @@ function coerceEmpty(v: any) {
 </template>
 
 <style scoped lang="scss">
+
+
 .nc-grid-wrapper {
+  --table-spacing: 14px;
+
   @apply h-full w-full overflow-auto;
 
   td,
@@ -1350,7 +1354,7 @@ function coerceEmpty(v: any) {
 
     .grouping-spacer {
       // background: lightgoldenrodyellow;
-      width: 1em;      
+      width: var(--table-spacing);
       @apply border-gray-200 border-solid border-l;
       flex-shrink: 0;
       &.end {
@@ -1371,8 +1375,15 @@ function coerceEmpty(v: any) {
       td {
         padding: 0;
       }
+      .grouping-cell-body {        
+        @apply bg-gray-200       
+      }
+    }
+    .grouping-cell-container {
       .grouping-cell-body {
-        background: lightblue;
+        @apply rounded-tl;
+        height: 100%;
+        @apply p-2
       }
     }
 
@@ -1385,7 +1396,7 @@ function coerceEmpty(v: any) {
       /* background: pink; */
       border-bottom: 1px solid #e1e4e8;
       
-      @apply border-r-1 border-r-gray-300;
+      // @apply border-r-1 border-r-gray-300;
 
       border-left: 1px solid #e1e4e8;
       1px solid #E1E4E8
@@ -1417,16 +1428,17 @@ function coerceEmpty(v: any) {
       pointer-events: none;
       // display: none;
     }
+
+    .grouping-cell-body {      
+      height: 100%;
+      // border: solid 1px #ccc;
+    }
+
     td:nth-child(2).active .cell-body::after {
       @apply border-1 border-solid text-primary border-current bg-primary bg-opacity-5;
     }
     
-    .grouping-cell-body {
-      
-      height: 100%;
-      // border: solid 1px #ccc;
-      @apply p-2
-    }
+
     td:nth-child(2) .grouping-cell-body {
       border-right-width: 1px;
       border-bottom-width: 1px;
@@ -1435,18 +1447,18 @@ function coerceEmpty(v: any) {
 
     tr.group-begin, tr.group-end {
       th, td {
-        height: 10px !important;
+        height: var(--table-spacing) !important;
       }      
       :where(td,th):nth-child(2) {       
         border-right-width: 0;
         border-bottom-width: 0;
       }
     }
-    tr.group-separator {
-      th, td {
-        height: 12px !important;
-      }
-    }
+    // tr.group-separator {
+    //   th, td {
+    //     height: 12px !important;
+    //   }
+    // }
     tr.group-end {
       // background: rgba(200,0,0,0.2);
       // .grouping-spacer:last-of-type {
@@ -1491,6 +1503,10 @@ function coerceEmpty(v: any) {
       }
     }
     tr.group-begin {
+      td {
+        border-bottom-width: 0;
+        border-right-width: 0;
+      }
       // background: rgba(0,200,0,0.2);
       :where(td,th):nth-child(1) {
         border-width: 0;
