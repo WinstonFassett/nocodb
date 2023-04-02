@@ -876,10 +876,22 @@ const closeAddColumnDropdown = () => {
                 <tr class="group-end" v-if="row.group && row.row.index > 0">
                   <td>{{ rowIndex }}</td>
                   <td>
-                    <div class="grouping-spacer" v-for="group in row.group.index" />
+                    <div class="flex">
+                      <div class="grouping-spacer" v-for="group in row.group.index+1" />
+                      <div class="grouping-cell-body flex-1"/>
+                    </div>
                   </td>
                   <td :colspan="visibleColLength - 1">end {{ row.group.index }} {{ row.group.value }}</td>
                 </tr>
+                <tr class="group-begin" v-if="row.group">
+                  <td>{{ rowIndex }}</td>
+                  <td>
+                    <div class="flex">
+                      <div class="grouping-spacer" v-for="group in row.group.index" />
+                    </div>
+                  </td>
+                  <td :colspan="visibleColLength - 1">begin {{ row.group.index }} {{ row.group.value }}</td>
+                </tr>                
                 <tr v-if="row.group" class="nc-group-row" :data-groupid="`grouping-${ row.group.value }`">
                   <td><div></div></td>
                   <td>
@@ -998,10 +1010,8 @@ const closeAddColumnDropdown = () => {
                     @contextmenu="showContextMenu($event, { row: rowIndex, col: colIndex })"
                   >
                     <div class="flex">
-                      <template v-if="colIndex === 0" v-for="(group, index) in groups">
-                        <div class="grouping-spacer h-full" :class="{ end: row.endsGroup?.index == index-1 }">
-                        {{ row.endsGroup?.index }}
-                        </div>
+                      <template v-if="isGrouping && colIndex === 0" v-for="index in groups.length - 1">
+                        <div class="grouping-spacer h-full" :class="{ end: row.endsGroup?.index == index-1 }" />
                       </template>
                       <div v-if="!switchingTab" class="cell-body h-full flex-1 flex items-center px-2">
                         <div>
@@ -1223,23 +1233,27 @@ const closeAddColumnDropdown = () => {
     .grouping-spacer {
       background: none;
       width: 1em;
-      border-right: solid 1px #ccc;
+      border-left: solid 1px #ccc;
       flex-shrink: 0;
       &.end {
-        background: red;
-        border-bottom: solid 1px #ccc;
+        // background: red;
+        // border-bottom: solid 1px #ccc;
       }
     }
     :where(td,th):where(:first-child, :nth-child(2)) {
-      border: none;
+      border-width: 0;
       padding: 0;
     }
     td:first-child {
-      border-right: 1px solid #ccc;
+      // border-right: 1px solid #ccc;
     }
+
     .nc-group-row {
       td {
         padding: 0;
+      }
+      .grouping-cell-body {
+        background: lightblue;
       }
     }
 
@@ -1250,8 +1264,10 @@ const closeAddColumnDropdown = () => {
 
     td:nth-child(2) .cell-body {
       /* background: pink; */
-      border-bottom: 1px solid #eee;
-      border-right: 1px solid #eee;
+      border-bottom: 1px solid #e1e4e8;
+      border-right: 1px solid #e1e4e8;
+      border-left: 1px solid #e1e4e8;
+      1px solid #E1E4E8
     }
 
     td:nth-child(2).active::after {
@@ -1285,7 +1301,7 @@ const closeAddColumnDropdown = () => {
     }
     
     .grouping-cell-body {
-      background: lightblue;
+      
       height: 100%;
       // border: solid 1px #ccc;
       @apply p-2
@@ -1296,60 +1312,32 @@ const closeAddColumnDropdown = () => {
       border-color: rgba(229, 231, 235, var(--tw-border-opacity));
     }
 
+    tr.group-begin,
+    tr.group-end {
+      :where(td,th):nth-child(2) {       
+        border-right-width: 0;
+      }
+    }
+    tr.group-end {
+      background: rgba(0,200,0,0.2);
+      td {
+        // border-width: 0 1px 1px 1px;
+      }
+      :where(td,th):where(:first-child, :nth-child(2)) {
+        border-width: 0;
+        padding: 0;
+      }
+    }
+    tr.group-begin {
+      :where(td,th):nth-child(1) {
+        border-width: 0;
+      }
+      :where(td,th):nth-child(2) {        
+        // border-bottom-width: 1px;        
+      }
+    }
   }
 
-
-
-  .grouping-old {
-    tbody tr.nc-grouping-row {
-      background: rgba(255,255,255,0.8)
-    }
-
-    tbody tr.nc-grouping-row,
-    tbody tr.nc-grouping-row > td  {
-      // position: sticky;
-      top: 40px;
-      z-index: 10;
-      // padding-top: 10px;
-      border: none;
-      border-top: 20px solid white;
-    }
-
-    .nc-grouping-row > td {
-      border: solid 1px #ccc;
-      padding: 0;
-    }
-    tbody tr.nc-grouping-row > td.nc-grouping-cell  {
-      z-index: 11;
-    }
-    .nc-grouping-cell  {
-      // width: 100%;
-      // display: flex;
-      // align-items: center;
-    
-    }
-    .nc-grouping-row:not(:first-child) > td {
-      // padding-top: 1em;;
-    }
-    .nc-grouping-row > td > div {
-      height: 100%;
-      // background-color: #ccc;
-      // padding: 1em;
-    }
-
-    .nc-grouping-row > td:first-child > div {
-      // border-top-left-radius: 10px;
-    }
-
-    .nc-grouping-row ~ tr.nc-grid-row > td:first-child {
-      // border-left: solid 1px #ccc;
-      border-bottom: none;
-    }
-    .nc-grouping-row ~ tr.nc-grid-row:last-child > td:first-child {
-      border-left: solid 1px #ccc;
-    }
-
-  }
 }
 
 :deep {
