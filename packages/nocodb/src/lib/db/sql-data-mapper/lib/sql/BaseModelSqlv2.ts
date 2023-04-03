@@ -224,8 +224,8 @@ class BaseModelSqlv2 {
           ? args.sortArr
           : await Sort.list({ viewId: this.viewId });
       const groups = args.groupArr?.length
-          ? args.groupArr
-          : await Group.list({ viewId: this.viewId });          
+        ? args.groupArr
+        : await Group.list({ viewId: this.viewId })
       if (groups.length) {
         const groupSorts = groups.map(group => {
           return new Sort({
