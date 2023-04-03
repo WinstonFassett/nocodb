@@ -994,6 +994,9 @@ function coerceEmpty(v: any) {
                         <!-- {{ row.row[groupName] }} -->
                         <div class="grouping-spacer" v-for="index in groupIndex" />
                         <div v-if="!switchingTab" class="grouping-cell-body w-full h-full" :set="columnObj = groupFields[groupIndex].field">
+                          <div class="text-gray-500 text-[9px] uppercase font-bold pl-1">
+                            {{columnObj.title}}
+                          </div>
                           <!-- <span v-if="isEmpty(row.row[columnObj.title])">(Empty)</span> -->
                           <LazySmartsheetVirtualCell
                             v-if="isVirtualCol(columnObj)"
