@@ -121,7 +121,6 @@ const {
   navigateToSiblingRow,
   getExpandedRowIndex,
 } = useViewData(meta, view, xWhere)
-console.log({ data, paginationData, navigateToSiblingRow })
 
 const groupCount = computed(() => {
   return groups.value?.length ?? 0
@@ -164,14 +163,12 @@ const rowsWithGroups = computed(() => {
   let currentRowGroupValues = new Array(groupFieldsArr.length)
 
   const { isLastPage } = paginationData.value
-  console.log({ isLastPage })
   const enhancedRows = rows.map((row, rowIndex) => {
     const groupsStarting = [] as number[]
     let groupsEnded = []
     let groupsChanged = false
 
     groupFieldsArr.forEach(({ group, field }, groupIndex) => {
-      console.log(activeGroupValueStack)
       const groupValue = row.row[field.title!] // index probably better(?)
       const prevRowGroupValue = currentRowGroupValues[groupIndex]
       const prevValue = prevRowGroupValue?.groupValue
@@ -181,19 +178,15 @@ const rowsWithGroups = computed(() => {
       }
       if (groupsChanged || !prevRowGroupValue || groupValue !== prevRowGroupValue.groupValue) {
         groupsChanged = true
-        if (prevRowGroupValue) {
-          console.log('group ended', field.title, groupValue, prevValue)
+        if (prevRowGroupValue) {          
           groupsEnded.push({
             groupIndex,
             ...prevRowGroupValue
           })
-        }
-        
-        console.log('group started', field.title, groupValue, prevValue)
+        }        
         groupsStarting.push(groupIndex)
       }
-      
-    })
+    })    
     groupsEnded.pop()
     return Object.freeze({
       ...row,
