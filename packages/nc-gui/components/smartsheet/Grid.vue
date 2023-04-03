@@ -880,8 +880,6 @@ function coerceEmpty(v: any) {
                     <div class="flex">                      
                       <template v-for="spacerOffset in ((groupIndex + 1))">
                         <div class="grouping-spacer h-full" :class="{ end: spacerOffset===(groupIndex+1) }">
-                          <!-- {{ `${spacerOffset},${groupOffset}` }} -->
-                          <!-- {{ groupIndex }} -->
                         </div>
                       </template>                      
                       
@@ -889,7 +887,6 @@ function coerceEmpty(v: any) {
                     </div>
                   </td>
                   <td :colspan="visibleColLength - 1">
-                    <!-- end {{ groupIndex }}  {{ data[rowIndex][groupFields[groupIndex]!.field.title!] }} {{  groupValue }} from row {{  rowIndex }} -->
                   </td>
                 </tr>
 
@@ -899,25 +896,21 @@ function coerceEmpty(v: any) {
                     <td>
                       <div class="flex">
                         <div class="grouping-spacer" v-for="offset in groupIndex">
-                          <!-- {{ offset }} -->
                         </div>
                       </div>
                     </td>
                     <td :colspan="visibleColLength - 1">
-                      <!-- begin {{ groupIndex }} {{ row.row[groupFields[groupIndex]!.field.title!] }} -->
                     </td>
                   </tr>                
                   <tr class="nc-group-row">
                     <td><div></div></td>
                     <td>
                       <div class="grouping-cell-container flex">
-                        <!-- {{ row.row[groupName] }} -->
                         <div class="grouping-spacer" v-for="index in groupIndex" />
                         <div v-if="!switchingTab" class="grouping-cell-body w-full h-full" :set="columnObj = groupFields[groupIndex].field">
                           <div class="text-gray-500 text-[9px] uppercase font-bold pl-1">
                             {{columnObj.title}}
                           </div>
-                          <!-- <span v-if="isEmpty(row.row[columnObj.title])">(Empty)</span> -->
                           <LazySmartsheetVirtualCell
                             v-if="isVirtualCol(columnObj)"
                             :modelValue="coerceEmpty(row.row[columnObj.title])"
@@ -927,7 +920,6 @@ function coerceEmpty(v: any) {
                             @navigate="onNavigate"
                             @save="updateOrSaveRow(row, '', state)"
                           />
-
                           <LazySmartsheetCell
                             v-else
                             :modelValue="coerceEmpty(row.row[columnObj.title])"
@@ -1073,7 +1065,6 @@ function coerceEmpty(v: any) {
                     <div class="flex">                      
                       <template v-for="spacerOffset in (groupCount - groupOffset)">
                         <div class="grouping-spacer h-full" :class="{ end: spacerOffset===(groupCount-groupOffset) }">
-                          <!-- {{ `${spacerOffset},${groupOffset}` }} -->
                         </div>
                       </template>
                       
