@@ -1269,7 +1269,6 @@ function coerceEmpty(v: any) {
   }
 
   &.grouped {
-    background-color: lightblue;
 
     .grouping-spacer {
       // background: lightgoldenrodyellow;
@@ -1278,16 +1277,12 @@ function coerceEmpty(v: any) {
       flex-shrink: 0;
       &.end {
         // background: pink;
-        // border-bottom: solid 1px #ccc;
         @apply border-b
       }
     }
     :where(td,th):where(:first-child, :nth-child(2)) {
       border-width: 0;
       padding: 0;
-    }
-    td:first-child {
-      // border-right: 1px solid #ccc;
     }
 
     .nc-group-row {
@@ -1312,13 +1307,8 @@ function coerceEmpty(v: any) {
     }
 
     td:nth-child(2) .cell-body {
-      /* background: pink; */
       border-bottom: 1px solid #e1e4e8;
-      
-      // @apply border-r-1 border-r-gray-300;
-
       border-left: 1px solid #e1e4e8;
-      1px solid #E1E4E8
     }
 
     td:nth-child(2).active::after {
@@ -1345,12 +1335,10 @@ function coerceEmpty(v: any) {
       left: 0;
       top: 0;
       pointer-events: none;
-      // display: none;
     }
 
     .grouping-cell-body {      
       height: 100%;
-      // border: solid 1px #ccc;
     }
 
     td:nth-child(2).active .cell-body::after {
@@ -1373,17 +1361,7 @@ function coerceEmpty(v: any) {
         border-bottom-width: 0;
       }
     }
-    // tr.group-separator {
-    //   th, td {
-    //     height: 12px !important;
-    //   }
-    // }
     tr.group-end {
-      // background: rgba(200,0,0,0.2);
-      // .grouping-spacer:last-of-type {
-      //   background-color: green;
-      //   border-bottom: solid 1px ;
-      // }
       td {
         border-width: 0;
         border-bottom-width: 1px;
@@ -1391,34 +1369,20 @@ function coerceEmpty(v: any) {
           border-right-width: 0;
         }
       }
-      // .grouping-spacer {
-      //   border-bottom-width: 1px;
-      // }
       td:first-child {
         border-bottom-width: 0;
       }
       :where(td,th):where(:first-child, :nth-child(2)) {
         border-width: 0;
-        padding: 0;
-        
+        padding: 0;        
       }
       &.final {
         .grouping-spacer {
           border-bottom-width: 0;
         }
         .end {
-          // background-color: pink;
           @apply border-gray-200 border-solid border-b;
         }
-        // td:where(:nth-child(2), :last-child) {
-        //   @apply border-gray-200 border-solid border-l border-r;
-        // }
-        // .grouping-spacer {
-        //   border-left-width: 0;
-        // }
-        // .grouping-spacer:first-child {
-        //   border-left-width: 1px;;
-        // }
       }
     }
     tr.group-begin {
@@ -1426,16 +1390,11 @@ function coerceEmpty(v: any) {
         border-bottom-width: 0;
         border-right-width: 0;
       }
-      // background: rgba(0,200,0,0.2);
       :where(td,th):nth-child(1) {
         border-width: 0;
       }
-      :where(td,th):nth-child(2) {        
-        // border-bottom-width: 1px;        
-      }
     }
   }
-
 }
 
 :deep {
