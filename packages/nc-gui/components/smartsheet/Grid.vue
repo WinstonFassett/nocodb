@@ -148,40 +148,6 @@ interface FieldGroup {
   group: GroupType
 }
 
-// enum GroupedViewPartType {
-//   GroupStart,
-//   Row,
-//   GroupEnd,
-// }
-// interface GroupedViewItem {
-//   type: GroupedViewPartType
-//   row: Row
-//   rowIndex: number
-//   group?: GroupType
-//   groupIndex?: number,
-//   value: any
-//   // field: ColumnType
-// }
-
-// interface RowGroupPart {
-//   type: GroupedViewPartType
-//   group?: GroupType
-//   groupIndex?: number,
-//   groupValue?: any
-// }
-
-interface RowGroupEnhancement {
-  groupsStarting: number[]
-  groupsEnded: number[]
-}
-
-interface RowGroupValue {
-  row: Row
-  rowIndex: number
-  groupIndex: number
-  groupValue: any
-}
-
 const finalRowIndex = computed(() => {
   const { isLastPage } = paginationData.value
   const rowCount = data.value.length
@@ -200,32 +166,19 @@ const rowsWithGroups = computed(() => {
   const { isLastPage } = paginationData.value
   console.log({ isLastPage })
   const enhancedRows = rows.map((row, rowIndex) => {
-    // let parts = [] as RowGroupPart[]
-    // const groupsEnding = [] as RowGroupPart[]    
     const groupsStarting = [] as number[]
     let groupsEnded = []
     let groupsChanged = false
-    // const isLastRow = rowIndex+1 === rowCount
-    // const isLastOfAllRows = isLastPage && isLastRow
-    // if (isLastRow) {
-    //   console.log({ isLastRow, isLastPage, isLastOfAllRows })
-    // }
 
     groupFieldsArr.forEach(({ group, field }, groupIndex) => {
       console.log(activeGroupValueStack)
       const groupValue = row.row[field.title!] // index probably better(?)
-      // const hasPrevValue = activeGroupValueStack.length > 0
-      // const prevValue = activeGroupValueStack.pop()
       const prevRowGroupValue = currentRowGroupValues[groupIndex]
       const prevValue = prevRowGroupValue?.groupValue
       currentRowGroupValues[groupIndex] = {
         rowIndex,
         groupValue
       }
-      // last row of entire recordset ends all groups
-      // if (rowIndex+1 === rowCount) {
-    
-      // activeGroupValueStack.push(groupValue)
       if (groupsChanged || !prevRowGroupValue || groupValue !== prevRowGroupValue.groupValue) {
         groupsChanged = true
         if (prevRowGroupValue) {
@@ -234,40 +187,13 @@ const rowsWithGroups = computed(() => {
             groupIndex,
             ...prevRowGroupValue
           })
-          // groupsEnding.push({
-          //   type: GroupedViewPartType.GroupStart,
-          //   group,
-          //   groupIndex,
-          //   groupValue
-          // })
         }
         
-        // parts.push({
-        //   type: GroupedViewPartType.GroupStart,
-        //   group,
-        //   groupIndex,          
-        //   groupValue
-        // })        
         console.log('group started', field.title, groupValue, prevValue)
         groupsStarting.push(groupIndex)
       }
       
-      //   console.log('last row', row)
-
-
-      // if (groupsChanged) {
-      // }
-      // useful?
-      // rowGroupValues.push(value)
     })
-    // parts.push({
-    //   type: GroupedViewPartType.Row      
-    // })
-    // parts = parts.concat(groupsEnding.reverse())
-    
-    
-    //   groupsEnded = groupFieldsArr.map((it, index) => index)
-    // }
     groupsEnded.pop()
     return Object.freeze({
       ...row,
