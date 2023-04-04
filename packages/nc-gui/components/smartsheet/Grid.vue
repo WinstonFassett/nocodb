@@ -169,6 +169,7 @@ const rowsWithGroups = computed(() => {
     let groupsChanged = false
 
     groupFieldsArr.forEach(({ group, field }, groupIndex) => {
+      if (!field) return
       const groupValue = row.row[field.title!] // index probably better(?)
       const prevRowGroupValue = currentRowGroupValues[groupIndex]
       const prevValue = prevRowGroupValue?.groupValue
@@ -1080,7 +1081,6 @@ function coerceEmpty(v: any) {
                     </div>
                   </td>
                   <td :colspan="visibleColLength - 1">
-                    <!-- end {{ groupIndex }}  {{ data[rowIndex][groupFields[groupIndex]!.field.title!] }} {{  groupValue }} from row {{  rowIndex }} -->
                   </td>
                 </tr>                
               </template>
